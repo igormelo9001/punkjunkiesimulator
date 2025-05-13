@@ -3,11 +3,12 @@ const engine = new BABYLON.Engine(canvas, true);
 
 function createScene() {
     const scene = new BABYLON.Scene(engine);
-    
-    // Camera
-    const camera = new BABYLON.FreeCamera("camera1", 
+      // Camera
+    const camera = new BABYLON.FollowCamera("followCamera", 
         new BABYLON.Vector3(0, 5, -10), scene);
-    camera.setTarget(BABYLON.Vector3.Zero());
+    camera.heightOffset = 3; // Altura da câmera em relação ao player
+    camera.rotationOffset = 180; // Rotação da câmera (180 = atrás do player)
+    camera.radius = 5; // Distância da câmera até o player
     camera.attachControl(canvas, true);
     
     // Light
@@ -201,9 +202,11 @@ function createScene() {
     rightArm.material = skinMaterial;
     body.material = shirtMaterial;
     leftLeg.material = pantsMaterial;
-    rightLeg.material = pantsMaterial;
-    leftShoe.material = shoesMaterial;
+    rightLeg.material = pantsMaterial;    leftShoe.material = shoesMaterial;
     rightShoe.material = shoesMaterial;
+
+    // Configurar camera para seguir o player
+    camera.lockedTarget = player;
 
     // Controles do player
     const speed = 0.2;
