@@ -1,6 +1,12 @@
 const canvas = document.getElementById("renderCanvas");
 const engine = new BABYLON.Engine(canvas, true);
 
+// Variáveis globais para física do pulo
+let isJumping = false;
+let verticalVelocity = 0;
+const gravity = -0.008; // Gravidade mais suave
+const jumpForce = 0.4; // Força de pulo maior
+
 function createScene() {
     const scene = new BABYLON.Scene(engine);
     
@@ -201,12 +207,12 @@ function createScene() {
     rightArm.material = skinMaterial;
     body.material = shirtMaterial;
     leftLeg.material = pantsMaterial;
-    rightLeg.material = pantsMaterial;
-    leftShoe.material = shoesMaterial;
+    rightLeg.material = pantsMaterial;    leftShoe.material = shoesMaterial;
     rightShoe.material = shoesMaterial;
 
     // Controles do player
     const speed = 0.2;
+    
     scene.onKeyboardObservable.add((kbInfo) => {
         if (kbInfo.type === BABYLON.KeyboardEventTypes.KEYDOWN) {
             const oldPosition = player.position.clone();
@@ -232,7 +238,12 @@ function createScene() {
                     player.position.x += speed;
                     player.rotation.y = Math.PI/2;
                     break;
-            }
+                case " ": // Tecla de espaço
+                    if (!isJumping) {
+                        isJumping = true;
+                        verticalVelocity = jumpForce;
+                    }
+                    break;            }
 
             // Verificar colisões
             for (const obj of collisionObjects) {
@@ -241,7 +252,7 @@ function createScene() {
                     break;
                 }
             }
-            
+
             // Animações
             leftLeg.rotation.x = Math.sin(Date.now() * 0.01) * 0.3;
             rightLeg.rotation.x = -Math.sin(Date.now() * 0.01) * 0.3;
@@ -256,6 +267,21 @@ function createScene() {
 const scene = createScene();
 
 engine.runRenderLoop(function () {
+    const player = scene.getTransformNodeByName("player");
+    
+    // Aplicar física do pulo
+    if (isJumping) {
+        player.position.y += verticalVelocity;
+        verticalVelocity += gravity;
+
+        // Verificar colisão com o chão
+        if (player.position.y <= 0) {
+            player.position.y = 0;
+            verticalVelocity = 0;
+            isJumping = false;
+        }
+    }
+
     scene.render();
 });
 
